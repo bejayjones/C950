@@ -40,6 +40,19 @@ for row in addressData:
     #this line normalizes the read in data so that it easier to compare with our package information
     address.append((row[1:2][0]).strip().replace("\n", " ").replace("(", "").replace(")", ""))
 
+def convertTime(x : float):
+    hours = int(x)
+    minutes = (x - hours) * 60
+    timestamp = str(hours) + ":" + str(int(minutes))
+    return timestamp
+def convertTimetoDecimal(x : str):
+    if(len(x) > 4):
+        hours = int(x[:2])
+        minutes = float(x[3:]) / 60
+    if(len(x) < 5):
+        hours = int(x[:2])
+        minutes = float(x[2:]) / 60
+    return hours + minutes
 
 #the following 9 variables are created to keep track of truck mileage at various times
 truck1TotalNine = 0
@@ -61,6 +74,7 @@ truck2TotalDistance = 0
 #that location, calculates the time taken to reach that destination, then sets the new starting location equal to the destination
 #of said package, marks the package as delivered
 #then removes said package from the array of packages so that it is not eligible to be the next location
+
 
 def runRoute(truck):
     firstLocation = 0
@@ -190,42 +204,65 @@ for each in truck2.packages:
 #run the final route for truck 2
 route4 = runRoute(truck2)
 
-#the following code generates three status reports at distinct intervals.
+#the following code generates status reports at times chosen by the user.
 #if the package is delivered before the status report, it will display the package information
 #and the time of which it was delivered
 #if the package has not been delivered by the time of the status report, it will display the package information
 #and say the package is en route at the time of the status check
-print("STATUS REPORT - 9:10AM")
-print("Truck 1 Total Mileage:", round(truck1TotalNine, 2), "Truck 2 Total Mileage:", round(truck2TotalNine, 2))
-for x in range(1, 41):
-    if(myHash.search(x).deliveryStatus[1] < 9.166666):
-        print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
-              myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, myHash.search(x).deliveryStatus[0], myHash.search(x).deliveryStatus[1])
-    else:
-        print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
-              myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, "en route", 9.17)
-print("")
-print("")
 
-print("STATUS REPORT - 10AM")
-print("Truck 1 Total Mileage:", round(truck1TotalTen, 2), "Truck 2 Total Mileage:", round(truck2TotalTen, 2))
-for x in range(1, 41):
-    if(myHash.search(x).deliveryStatus[1] < 10):
-        print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
-              myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, myHash.search(x).deliveryStatus[0], myHash.search(x).deliveryStatus[1])
-    else:
-        print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
-              myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, "en route", 10.00)
-print("")
-print("")
+#this function checks the status of all packages at a given time
+def packageCheck(packageTime):
+    print("")
+    print("****************************************************")
+    print("STATUS CHECK FOR ALL PACKAGES AT ", packageTime)
+    print("")
+    packageTime = convertTimetoDecimal(packageTime)
+    truck1Distance = (packageTime - 8) * 18
+    truck2Distance = (packageTime - 8) * 18
+    if(truck1.time < packageTime):
+        truck1Distance = ((truck1.time - 8) * 18)
+    if(truck2.time < packageTime):
+        truck2Distance = ((truck2.time - 8) * 18)
+    print("Truck 1 Total Distance Driven: " + str(round(truck1Distance, 2)) + " Truck 2 Total Distance Driven: " + str(round(truck2Distance, 2)))
+    for x in range(1, 41):
+        if (myHash.search(x).deliveryStatus[1] < packageTime):
+            print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
+                  myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass,
+                  myHash.search(x).deliveryStatus[0], convertTime(myHash.search(x).deliveryStatus[1]))
+        else:
+            print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
+                  myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, "en route", packageTime)
 
-print("STATUS REPORT - 12:17PM")
-print("Truck 1 Total Mileage:", round(truck1TotalTwelve, 2), "Truck 2 Total Mileage:", round(truck2TotalTwelve, 2))
-for x in range(1, 41):
-    if(myHash.search(x).deliveryStatus[1] < 12.28):
-        print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
-              myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, myHash.search(x).deliveryStatus[0], myHash.search(x).deliveryStatus[1])
-    else:
-        print(myHash.search(x).id, myHash.search(x).address, myHash.search(x).deliveryTime,
-              myHash.search(x).city, myHash.search(x).zip, myHash.search(x).mass, "en route", 12.28)
+    print("")
+    print("****************************************************")
+#this function checks the status of a single chosen package at a given time
+def singlePackageCheck(packageNumber, packageTime):
+    print("")
+    print("****************************************************")
+    print("STATUS CHECK FOR PACKAGE: ", str(packageNumber), " AT ", packageTime)
+    print("")
 
+    packageTime = convertTimetoDecimal(packageTime)
+    if(myHash.search(packageNumber).deliveryStatus[1] < packageTime):
+        print(myHash.search(packageNumber).id, myHash.search(packageNumber).address, myHash.search(packageNumber).deliveryTime,
+              myHash.search(packageNumber).city, myHash.search(packageNumber).zip, myHash.search(packageNumber).mass,
+              myHash.search(packageNumber).deliveryStatus[0], convertTime(myHash.search(packageNumber).deliveryStatus[1]))
+    else:
+        print(myHash.search(packageNumber).id, myHash.search(packageNumber).address, myHash.search(packageNumber).deliveryTime,
+              myHash.search(packageNumber).city, myHash.search(packageNumber).zip, myHash.search(packageNumber).mass,
+              "en route", packageTime)
+    print("")
+    print("****************************************************")
+
+#wait for user input
+#depending on input ask user for more information then run appropriate functions
+statusCheck = 's'
+while statusCheck != 'q':
+    statusCheck = input("Press '1' to check status of all packages, Press '2' to check the status of a single package, or press 'q' to quit the program: ")
+    if(statusCheck == '1'):
+        packageTime = input("Enter a time for the status check: (HH:mm) 24-hour format: ")
+        packageCheck(packageTime)
+    if(statusCheck == '2'):
+        packageNumber = int(input("Enter the package number: "))
+        packageTime = input("Enter a time for the status check: (HH:mm) 24-hour format: ")
+        singlePackageCheck(packageNumber, packageTime)
